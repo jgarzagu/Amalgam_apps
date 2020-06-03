@@ -1,0 +1,3 @@
+#myButton {
+    hardware : physical-button(gpio:4);
+}

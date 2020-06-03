@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="import" href="../amalgam/amalgam.html" />
+    <link rel="stylesheet" href="hardware.css" />
+    <style>
+      /* CSS code */
+    </style>
+  </head>
+  <body>
+    <!-- HTML code -->
+    <input type="range" id="mySensor" min="-45" max="125" step="1" value="25" />
+    <script>
+      var mySensor = document.getElementById("mySensor");
+      mySensor.oninput = function() {
+        console.log("Sensor Value:", this);
+      };
+    </script>
+  </body>
+</html>

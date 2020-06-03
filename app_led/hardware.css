@@ -1,0 +1,11 @@
+#turnOFF {
+    hardware : physical-button(gpio:4);
+}
+
+#myLED {
+    hardware : physical-output(gpio:27);
+}
+
+#myLED {
+	display: none;
+}
