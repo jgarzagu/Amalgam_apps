@@ -10,16 +10,17 @@ class PHYSICAL_MOTORIZED_POT extends HTMLElement {
 		this.motora;
 		this.motorb;
 		this.touch;
-    this.POTADCMIN = 19;
+    this.POTADCMIN = 10;
     this.POTADCMAX = 1070;
     this.FDW = 0;
     this.BKW = 1;
     this.STOP = 2;
     this.Wire = null;
     this.i2cport = null;
+    this.adcChannel = 0; // A0
 
     // Libraries
-    this.ADC = require("Adafrui_ADS1015");
+    this.ADC = require(global.appbasedir + "/amalgam/libraries/Adafruit_ADS1015");
 	}
 
   motor(pinOne, pinTwo, motorDir) {
@@ -35,42 +36,45 @@ class PHYSICAL_MOTORIZED_POT extends HTMLElement {
     }
   }
 
-  setSliderPosition(sliderPos, pinMotorOne, pinMotorTwo, pinTouch, analogPin) {    
-    var val = this.ADC.ads_readADC(this.Wire, analogPin);     // read the analog input
+  setSliderPosition(sliderPos, pinMotorOne, pinMotorTwo, pinTouch, channel) {    
+    var val = this.ADC.ads_readADC(this.Wire, channel);     // read the analog input
     //console.log("Init ADC: "+val+" POS:"+sliderPos);
     if (val < sliderPos-5 && !Linuxduino.digitalRead(pinTouch)) {
       this.motor(pinMotorOne, pinMotorTwo, this.FDW);
-      while (this.ADC.ads_readADC(this.Wire, analogPin) < sliderPos && !Linuxduino.digitalRead(pinTouch)){
-        console.log("Moving FDW"); 
-      }
+      do {
+        var adsValue = this.ADC.ads_readADC(this.Wire, channel)
+        console.log("Moving FWD, Target ADC:", sliderPos, "Read ADC:", adsValue); 
+      } while (adsValue < sliderPos && !Linuxduino.digitalRead(pinTouch));
       this.motor(pinMotorOne, pinMotorTwo, this.STOP);
     } else if (val > sliderPos+5) {
       this.motor(pinMotorOne, pinMotorTwo, this.BKW);
-      while (this.ADC.ads_readADC(this.Wire, analogPin) > sliderPos && !Linuxduino.digitalRead(pinTouch)){
-       console.log("Moving BKW"); 
-      }
+      do {
+        var adsValue = this.ADC.ads_readADC(this.Wire, channel)
+        console.log("Moving BKW, Target ADC:", sliderPos, "Read ADC:", adsValue); 
+      } while (adsValue > sliderPos && !Linuxduino.digitalRead(pinTouch));
       this.motor(pinMotorOne, pinMotorTwo, this.STOP);
     } else {
       console.log("Reached a Set Point");
     }
   }
 
-  onlyFordwardSlider(sliderPos, pinMotorOne, pinMotorTwo, pinTouch, analogPin) {         
-    var val = this.ADC.ads_readADC(this.Wire, analogPin);     // read the input pin
+  onlyFordwardSlider(sliderPos, pinMotorOne, pinMotorTwo, pinTouch, channel) {         
+    var val = this.ADC.ads_readADC(this.Wire, channel);     // read the input pin
     //console.log("ADC: "+val+" POS:"+sliderPos);
     if (val < sliderPos && !Linuxduino.digitalRead(pinTouch)) {
       //console.log("value less than setPoint");
       this.motor(pinMotorOne, pinMotorTwo, this.FDW);
-      while (this.ADC.ads_readADC(this.Wire, analogPin) < sliderPos && !Linuxduino.digitalRead(pinTouch)){
-        console.log("Moving FDW"); 
-      }
+      do {
+        var adsValue = this.ADC.ads_readADC(this.Wire, channel)
+        console.log("Moving FWD, Target ADC:", sliderPos, "Read ADC:", adsValue); 
+      } while (adsValue < sliderPos && !Linuxduino.digitalRead(pinTouch));
       this.motor(pinMotorOne, pinMotorTwo, this.STOP);
     }
   }
 
-  checkNewSliderPosition(pinTouch, analogPin) {
+  checkNewSliderPosition(pinTouch, channel) {
     if (Linuxduino.digitalRead(pinTouch) == Linuxduino.HIGH) {
-      return this.ADC.ads_readADC(this.Wire, analogPin);
+      return this.ADC.ads_readADC(this.Wire, channel);
     } else {
       return -1;
     }
@@ -94,7 +98,7 @@ class PHYSICAL_MOTORIZED_POT extends HTMLElement {
   			this.value != undefined   &&
   			this.touch  != undefined ) {
 
-  			var newPosition = this.checkNewSliderPosition(this.touch, 1);
+  			var newPosition = this.checkNewSliderPosition(this.touch, this.adcChannel);
   			if (newPosition != -1) {
   				// Map values
 					var rangeValue = this.map(newPosition, this.POTADCMIN, 
@@ -123,10 +127,10 @@ class PHYSICAL_MOTORIZED_POT extends HTMLElement {
 			this.value = newPosition;
 			if (direction == this.FDW) {
 				//console.log("FDW New Position:"+newPosition);
-				this.onlyFordwardSlider(this.value, this.motora, this.motorb, this.touch, 1);
+				this.onlyFordwardSlider(this.value, this.motora, this.motorb, this.touch, this.adcChannel);
 			} else if (direction == this.BKW) {
 				//console.log("BKW New Position:"+newPosition);
-				this.setSliderPosition(this.value, this.motora, this.motorb, this.touch, 1);
+				this.setSliderPosition(this.value, this.motora, this.motorb, this.touch, this.adcChannel);
 			}
   	}
 
@@ -156,7 +160,7 @@ class PHYSICAL_MOTORIZED_POT extends HTMLElement {
 
   	var newPosition = this.map(this.value, this.min, this.max, 
         this.POTADCMIN, this.POTADCMAX, this.step);
-  	this.setSliderPosition(newPosition, this.motora, this.motorb, this.touch, 1);
+  	this.setSliderPosition(newPosition, this.motora, this.motorb, this.touch, this.adcChannel);
     this.onSliderInput(500);
   }
 

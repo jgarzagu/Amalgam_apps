@@ -10,7 +10,7 @@ class PHYSICAL_SERVO_MOTOR extends HTMLElement {
     this.i2caddr = null;
     
     // Libraries
-    this.PWM = require("Adafruit_PCA9685");
+    this.ADC = require(global.appbasedir + "/amalgam/libraries/Adafruit_PCA9685");
 
     // Others
     this.SERVOMIN =  125; // this is the 'minimum' pulse length count (out of 4096)

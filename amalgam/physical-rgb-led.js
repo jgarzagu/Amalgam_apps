@@ -7,7 +7,7 @@ class PHYSICAL_RGB_LED extends HTMLElement {
     this.spiport = null;
 
     // Libraries
-    this.RGB = require("Adafruit_RGBLEDS");
+    this.RGB = require(global.appbasedir + "/amalgam/libraries/Adafruit_RGBLEDS");
   }
  
   // Monitor attribute changes.

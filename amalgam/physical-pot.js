@@ -17,7 +17,7 @@ class PHYSICAL_POT extends HTMLElement {
 		this.i2caddr = null;
 
 		// Libraries
-		this.ADC = require("Adafrui_ADS1015");
+		this.ADC = require(global.appbasedir + "/amalgam/libraries/Adafruit_ADS1015");
 	}
 
 	map (x, in_min, in_max, out_min, out_max, step) {
